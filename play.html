@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中醫知識互動遊戲</title>
+    <style>
+        /* 基礎樣式和配色 */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #F2E8DF; /* 淡杏色背景 */
+        }
+
+        #game-container {
+            text-align: center;
+            max-width: 500px;
+            background-color: #FAF3E3; /* 溫柔米白色 */
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            box-sizing: border-box;
+        }
+
+        #question-container, #end-screen {
+            display: none;
+        }
+
+        h1 {
+            color: #6A5D4D; /* 淡褐色標題 */
+        }
+
+        .option-button {
+            width: 100%;
+            padding: 12px;
+            margin: 5px 0;
+            font-size: 16px;
+            color: #5C4E3B; /* 深褐色文字 */
+            background-color: #FFD6BA; /* 馬卡龍杏橙色 */
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .option-button:hover {
+            background-color: #F4A896; /* 偏橙粉色，增加互動性 */
+        }
+
+        #score-container {
+            margin-top: 20px;
+            color: #5C4E3B; /* 深褐色文字 */
+        }
+
+        #end-game, #restart-game {
+            background-color: #A8DADC; /* 馬卡龍藍綠色 */
+            color: #355C7D; /* 深藍灰色 */
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+
+        #end-game:hover, #restart-game:hover {
+            background-color: #74B3CE; /* 深一點的藍綠色 */
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            #game-container {
+                padding: 15px;
+            }
+
+            .option-button {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            #end-game, #restart-game {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>中醫知識互動遊戲</h1>
+        <div id="question-container">
+            <p id="question"></p>
+            <div id="options">
+                <button class="option-button" onclick="selectAnswer(0)"></button>
+                <button class="option-button" onclick="selectAnswer(1)"></button>
+                <button class="option-button" onclick="selectAnswer(2)"></button>
+                <button class="option-button" onclick="selectAnswer(3)"></button>
+            </div>
+        </div>
+        <div id="score-container">
+            <p>目前得分：<span id="score">0</span>/100</p>
+            <p>最高得分：<span id="high-score">0</span>/100</p>
+        </div>
+        <button id="end-game" onclick="endGame()">結束遊戲</button>
+
+        <div id="end-screen">
+            <h2>遊戲結束！</h2>
+            <p>您的最終得分：<span id="final-score">0</span>/100</p>
+            <p>目前最高得分：<span id="high-score-final">0</span>/100</p>
+            <button id="restart-game" onclick="restartGame()">重新開始遊戲</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            { question: "諸風掉眩，皆屬於哪個臟腑？", options: ["肝", "腎", "肺", "脾"], answer: 0 },
+            { question: "諸寒收引，皆屬於哪個臟腑？", options: ["火", "腎", "心", "肺"], answer: 1 },
+            { question: "諸氣膹鬱，皆屬於哪個臟腑？", options: ["肝", "肺", "腎", "火"], answer: 1 },
+            { question: "諸濕腫滿，皆屬於哪個臟腑？", options: ["脾", "腎", "肝", "肺"], answer: 0 },
+            { question: "諸熱瞀瘛，皆屬於哪個證候？", options: ["火證", "水證", "風證", "寒證"], answer: 0 },
+            { question: "諸痛癢瘡，皆屬於哪個臟腑？", options: ["心", "肺", "肝", "脾"], answer: 0 },
+            { question: "諸厥固泄，皆屬於哪個部位？", options: ["上焦", "下焦", "中焦", "腎"], answer: 1 },
+            { question: "諸痿喘嘔，皆屬於哪個部位？", options: ["上部", "下部", "肝", "脾"], answer: 0 },
+            { question: "諸痙鼓慄，如喪神守，皆屬於哪個證候？", options: ["火證", "寒證", "水證", "風證"], answer: 0 },
+            { question: "諸痙項強，皆屬於哪個證候？", options: ["濕證", "火證", "風證", "寒證"], answer: 0 },
+            { question: "諸腹脹大，皆屬於哪個證候？", options: ["熱證", "寒證", "風證", "水證"], answer: 0 },
+            { question: "諸逆衝上，皆屬於哪個證候？", options: ["火證", "寒證", "水證", "風證"], answer: 0 },
+            { question: "諸躁狂越，皆屬於哪個證候？", options: ["火證", "寒證", "水證", "風證"], answer: 0 },
+            { question: "諸暴強直，皆屬於哪個證候？", options: ["風證", "火證", "水證", "寒證"], answer: 0 },
+            { question: "諸病有聲，鼓之如鼓，皆屬於哪個證候？", options: ["熱證", "寒證", "風證", "水證"], answer: 0 },
+            { question: "諸病跗腫，疼酸驚駭，皆屬於哪個證候？", options: ["火證", "寒證", "水證", "風證"], answer: 0 },
+            { question: "諸轉反戾，水液渾濁，皆屬於哪個證候？", options: ["熱證", "寒證", "風證", "水證"], answer: 0 },
+            { question: "諸病水液，澄澈清冷，皆屬於哪個證候？", options: ["寒證", "熱證", "風證", "水證"], answer: 0 },
+            { question: "諸嘔吐酸，暴注下迫，皆屬於哪個證候？", options: ["熱證", "寒證", "風證", "水證"], answer: 0 }
+        ];
+
+        let score = 0;
+        let highScore = parseInt(localStorage.getItem('highScore')) || 0;
+        let incorrectQuestions = [];
+        let currentQuestions = [...questions];
+        const totalQuestions = questions.length;
+        const maxScore = 100;
+
+        document.getElementById('high-score').innerText = highScore;
+
+        function loadQuestion() {
+            document.getElementById('question-container').style.display = 'block'; // 顯示問題容器
+
+            if (currentQuestions.length === 0) {
+                if (incorrectQuestions.length > 0) {
+                    currentQuestions = [...incorrectQuestions];
+                    incorrectQuestions = [];
+                } else {
+                    endGame();
+                    return;
+                }
+            }
+
+            const questionElement = document.getElementById('question');
+            const optionButtons = document.getElementsByClassName('option-button');
+
+            const randomIndex = Math.floor(Math.random() * currentQuestions.length);
+            const questionData = currentQuestions.splice(randomIndex, 1)[0];
+
+            questionElement.innerText = questionData.question;
+
+            for (let i = 0; i < optionButtons.length; i++) {
+                optionButtons[i].innerText = questionData.options[i];
+                optionButtons[i].dataset.correct = (i === questionData.answer).toString();
+            }
+        }
+
+        function selectAnswer(selectedIndex) {
+            const selectedOption = document.getElementsByClassName('option-button')[selectedIndex];
+            const isCorrect = selectedOption.dataset.correct === "true";
+
+            if (isCorrect) {
+                const pointsPerQuestion = Math.floor(maxScore / totalQuestions);
+                score += pointsPerQuestion;
+                if (score > 100) score = 100;  // 確保分數不超過100
+                alert("答對了！");
+            } else {
+                alert("答錯了，再接再厲！");
+                const questionText = document.getElementById('question').innerText;
+                const currentQuestion = questions.find(q => q.question === questionText);
+                incorrectQuestions.push(currentQuestion);
+            }
+
+            document.getElementById('score').innerText = score;
+            loadQuestion();
+        }
+
+        function endGame() {
+            document.getElementById('question-container').style.display = 'none';
+            document.getElementById('end-game').style.display = 'none';
+            document.getElementById('end-screen').style.display = 'block';
+
+            document.getElementById('final-score').innerText = score;
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('highScore', highScore);
+                alert("新最高得分！恭喜！");
+            }
+            document.getElementById('high-score-final').innerText = highScore;
+            document.getElementById('high-score').innerText = highScore;
+        }
+
+        function restartGame() {
+            score = 0;
+            document.getElementById('score').innerText = score;
+            currentQuestions = [...questions];
+            incorrectQuestions = [];
+            document.getElementById('question-container').style.display = 'block';
+            document.getElementById('end-game').style.display = 'block';
+            document.getElementById('end-screen').style.display = 'none';
+            loadQuestion();
+        }
+
+        loadQuestion();
+    </script>
+</body>
+</html>
