@@ -26,22 +26,21 @@
         .menu-button {
             padding: 20px;
             font-size: 18px;
-            background-color: #FFD6BA;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             transition: background-color 0.3s;
+            color: #5C5C5C; /* 按鈕文字顏色 */
         }
 
         .menu-button:hover {
-            background-color: #F4A896;
+            filter: brightness(1.1); /* 懸停時略微增加亮度 */
         }
 
     </style>
 </head>
 <body>
     <div id="menu-container">
-        <!-- 每個按鈕都連結到相應的 HTML 檔案 -->
         <button class="menu-button" onclick="navigateTo('play01.html')">病機十九條</button>
         <button class="menu-button" onclick="navigateTo('play02.html')">傷寒論背誦</button>
         <button class="menu-button" onclick="navigateTo('play03.html')">新學期新希望</button>
@@ -54,6 +53,24 @@
     </div>
 
     <script>
+        // 定義莫蘭迪風格和馬卡龍色系的顏色組
+        const colorThemes = [
+            ["#F0E5CF", "#E6C3CC", "#B5D8CC"], // 莫蘭迪淡色系
+            ["#D4A5A5", "#8FBAC8", "#B9D7C9"], // 莫蘭迪柔和色系
+            ["#A3C4BC", "#E6B8A2", "#FFC8A2"], // 馬卡龍柔和色系
+            ["#FFD1BA", "#FFABAB", "#A0E7E5"], // 馬卡龍淡彩色系
+            ["#D3BCC0", "#9DB4AB", "#7D8570"]  // 莫蘭迪綠灰色系
+        ];
+
+        // 隨機選擇一組顏色
+        const selectedColors = colorThemes[Math.floor(Math.random() * colorThemes.length)];
+
+        // 將顏色套用至每個按鈕
+        const buttons = document.querySelectorAll(".menu-button");
+        buttons.forEach((button, index) => {
+            button.style.backgroundColor = selectedColors[index % selectedColors.length];
+        });
+
         // 使用 JavaScript 導航到相應的頁面
         function navigateTo(page) {
             window.location.href = page;
