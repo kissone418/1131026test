@@ -25,7 +25,7 @@
         }
 
         h1 {
-            color: #6A5D4D;
+            color: #4A4A4A;
         }
 
         .option-button {
@@ -37,10 +37,12 @@
             border-radius: 8px;
             cursor: pointer;
             transition: background-color 0.3s;
+            color: white; /* 預設按鈕文字為白色，方便辨識 */
         }
 
         #score-container {
             margin-top: 20px;
+            color: #4A4A4A;
         }
 
         #end-game, #restart-game {
@@ -98,16 +100,16 @@
     <script>
         // 定義十組莫蘭迪和馬卡龍色系的配色方案
         const colorThemes = [
-            { background: "#F0E5CF", button: "#E6C3CC", text: "#5C4E3B" },
-            { background: "#D4A5A5", button: "#8FBAC8", text: "#5C4E3B" },
-            { background: "#A3C4BC", button: "#E6B8A2", text: "#5C4E3B" },
-            { background: "#FFD1BA", button: "#FFABAB", text: "#5C4E3B" },
-            { background: "#D3BCC0", button: "#9DB4AB", text: "#5C4E3B" },
-            { background: "#F3D1BF", button: "#BFD8D2", text: "#5C4E3B" },
-            { background: "#C2C5BB", button: "#D8A7B1", text: "#5C4E3B" },
-            { background: "#F8D4A0", button: "#A7D8B8", text: "#5C4E3B" },
-            { background: "#B5C1B4", button: "#F3B5A7", text: "#5C4E3B" },
-            { background: "#C7B8A2", button: "#A3CDD2", text: "#5C4E3B" },
+            { background: "#F0E5CF", button: "#E6C3CC", text: "#333333" },
+            { background: "#D4A5A5", button: "#8FBAC8", text: "#333333" },
+            { background: "#A3C4BC", button: "#E6B8A2", text: "#333333" },
+            { background: "#FFD1BA", button: "#FFABAB", text: "#333333" },
+            { background: "#D3BCC0", button: "#9DB4AB", text: "#333333" },
+            { background: "#F3D1BF", button: "#BFD8D2", text: "#333333" },
+            { background: "#C2C5BB", button: "#D8A7B1", text: "#333333" },
+            { background: "#F8D4A0", button: "#A7D8B8", text: "#333333" },
+            { background: "#B5C1B4", button: "#F3B5A7", text: "#333333" },
+            { background: "#C7B8A2", button: "#A3CDD2", text: "#333333" },
         ];
 
         // 隨機選擇一組顏色
