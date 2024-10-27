@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>知識互動遊戲</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #game-container {
+            text-align: center;
+            max-width: 500px;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            color: #6A5D4D;
+        }
+
+        .option-button {
+            width: 100%;
+            padding: 12px;
+            margin: 5px 0;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #score-container {
+            margin-top: 20px;
+        }
+
+        #end-game, #restart-game {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+
+        @media (max-width: 768px) {
+            #game-container {
+                padding: 15px;
+            }
+
+            .option-button {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            #end-game, #restart-game {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>知識互動遊戲</h1>
+        <div id="question-container">
+            <p id="question"></p>
+            <div id="options">
+                <button class="option-button" onclick="selectAnswer(0)"></button>
+                <button class="option-button" onclick="selectAnswer(1)"></button>
+                <button class="option-button" onclick="selectAnswer(2)"></button>
+                <button class="option-button" onclick="selectAnswer(3)"></button>
+            </div>
+        </div>
+        <div id="score-container">
+            <p>目前得分：<span id="score">0</span>/100</p>
+            <p>最高得分：<span id="high-score">0</span>/100</p>
+        </div>
+        <button id="end-game" onclick="endGame()">結束遊戲</button>
+
+        <div id="end-screen">
+            <h2>遊戲結束！</h2>
+            <p>您的最終得分：<span id="final-score">0</span>/100</p>
+            <p>目前最高得分：<span id="high-score-final">0</span>/100</p>
+            <button id="restart-game" onclick="restartGame()">重新開始遊戲</button>
+        </div>
+    </div>
+
+    <script>
+        // 定義十組莫蘭迪和馬卡龍色系的配色方案
+        const colorThemes = [
+            { background: "#F0E5CF", button: "#E6C3CC", text: "#5C4E3B" },
+            { background: "#D4A5A5", button: "#8FBAC8", text: "#5C4E3B" },
+            { background: "#A3C4BC", button: "#E6B8A2", text: "#5C4E3B" },
+            { background: "#FFD1BA", button: "#FFABAB", text: "#5C4E3B" },
+            { background: "#D3BCC0", button: "#9DB4AB", text: "#5C4E3B" },
+            { background: "#F3D1BF", button: "#BFD8D2", text: "#5C4E3B" },
+            { background: "#C2C5BB", button: "#D8A7B1", text: "#5C4E3B" },
+            { background: "#F8D4A0", button: "#A7D8B8", text: "#5C4E3B" },
+            { background: "#B5C1B4", button: "#F3B5A7", text: "#5C4E3B" },
+            { background: "#C7B8A2", button: "#A3CDD2", text: "#5C4E3B" },
+        ];
+
+        // 隨機選擇一組顏色
+        const selectedTheme = colorThemes[Math.floor(Math.random() * colorThemes.length)];
+
+        // 將顏色應用到整個頁面
+        document.body.style.backgroundColor = selectedTheme.background;
+        document.querySelector("#game-container").style.backgroundColor = selectedTheme.background;
+        document.querySelectorAll(".option-button").forEach(button => {
+            button.style.backgroundColor = selectedTheme.button;
+            button.style.color = selectedTheme.text;
+        });
+        document.querySelectorAll("#end-game, #restart-game").forEach(button => {
+            button.style.backgroundColor = selectedTheme.button;
+            button.style.color = selectedTheme.text;
+        });
+        document.querySelector("#score-container").style.color = selectedTheme.text;
+
+        // 其餘遊戲的邏輯程式碼
+        let allQuestions = [];
+        let currentQuestions = [];
+        let score = 0;
+        let highScore = parseInt(localStorage.getItem('highScore')) || 0;
+        const maxScore = 100;
+        let numberOfQuestions = 10; // 預設題數
+
+        document.getElementById('high-score').innerText = highScore;
+
+        // 從CSV載入資料
+        async function loadQuestions() {
+            const response = await fetch('testdemo.csv');
+            const data = await response.text();
+            const rows = data.split('\n').slice(1); // 忽略標題行
+            rows.forEach(row => {
+                const [question, option_1, option_2, option_3, option_4, answer] = row.split(',');
+                allQuestions.push({
+                    question,
+                    options: [option_1, option_2, option_3, option_4],
+                    answer: parseInt(answer)
+                });
+            });
+            askQuestionCount();
+        }
+
+        // 問使用者要玩幾題
+        function askQuestionCount() {
+            let input = prompt("請輸入要玩的題數（預設10題）：");
+            numberOfQuestions = parseInt(input);
+            if (isNaN(numberOfQuestions) || numberOfQuestions <= 0) {
+                numberOfQuestions = 10; // 預設10題
+            }
+            if (numberOfQuestions > allQuestions.length) {
+                numberOfQuestions = allQuestions.length; // 如果超出題庫數量，設定為題庫數量
+            }
+            startGame();
+        }
+
+        function startGame() {
+            // 隨機選擇指定數量的題目
+            currentQuestions = allQuestions.sort(() => 0.5 - Math.random()).slice(0, numberOfQuestions);
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            document.getElementById('question-container').style.display = 'block';
+            if (currentQuestions.length === 0) {
+                endGame();
+                return;
+            }
+            const questionData = currentQuestions.shift();
+            document.getElementById('question').innerText = questionData.question;
+
+            const optionButtons = document.getElementsByClassName('option-button');
+            for (let i = 0; i < optionButtons.length; i++) {
+                optionButtons[i].innerText = questionData.options[i];
+                optionButtons[i].dataset.correct = (i === questionData.answer).toString();
+            }
+        }
+
+        function selectAnswer(selectedIndex) {
+            const selectedOption = document.getElementsByClassName('option-button')[selectedIndex];
+            const isCorrect = selectedOption.dataset.correct === "true";
+
+            if (isCorrect) {
+                const pointsPerQuestion = Math.floor(maxScore / numberOfQuestions);
+                score += pointsPerQuestion;
+                if (score > 100) score = 100;
+                alert("答對了！");
+            } else {
+                alert("答錯了，再接再厲！");
+            }
+
+            document.getElementById('score').innerText = score;
+            loadQuestion();
+        }
+
+        function endGame() {
+            document.getElementById('question-container').style.display = 'none';
+            document.getElementById('end-game').style.display = 'none';
+            document.getElementById('end-screen').style.display = 'block';
+
+            document.getElementById('final-score').innerText = score;
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('highScore', highScore);
+                alert("新最高得分！恭喜！");
+            }
+            document.getElementById('high-score-final').innerText = highScore;
+            document.getElementById('high-score').innerText = highScore;
+        }
+
+        function restartGame() {
+            score = 0;
+            document.getElementById('score').innerText = score;
+            currentQuestions = [];
+            askQuestionCount(); // 重啟遊戲時再詢問題數
+        }
+
+        // 初始載入題目並設定顏色
+        loadQuestions();
+    </script>
+</body>
+</html>
+
