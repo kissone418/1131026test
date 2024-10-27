@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>傷寒論知識互動遊戲</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #F2E8DF;
+        }
+
+        #game-container {
+            text-align: center;
+            max-width: 500px;
+            background-color: #FAF3E3;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            box-sizing: border-box;
+        }
+
+        #question-container, #end-screen {
+            display: none;
+        }
+
+        h1 {
+            color: #6A5D4D;
+        }
+
+        .option-button {
+            width: 100%;
+            padding: 12px;
+            margin: 5px 0;
+            font-size: 16px;
+            color: #5C4E3B;
+            background-color: #FFD6BA;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .option-button:hover {
+            background-color: #F4A896;
+        }
+
+        #score-container {
+            margin-top: 20px;
+            color: #5C4E3B;
+        }
+
+        #end-game, #restart-game {
+            background-color: #A8DADC;
+            color: #355C7D;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+
+        #end-game:hover, #restart-game:hover {
+            background-color: #74B3CE;
+        }
+
+        @media (max-width: 768px) {
+            #game-container {
+                padding: 15px;
+            }
+
+            .option-button {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            #end-game, #restart-game {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>傷寒論知識互動遊戲</h1>
+        <div id="question-container">
+            <p id="question"></p>
+            <div id="options">
+                <button class="option-button" onclick="selectAnswer(0)"></button>
+                <button class="option-button" onclick="selectAnswer(1)"></button>
+                <button class="option-button" onclick="selectAnswer(2)"></button>
+                <button class="option-button" onclick="selectAnswer(3)"></button>
+            </div>
+        </div>
+        <div id="score-container">
+            <p>目前得分：<span id="score">0</span>/100</p>
+            <p>最高得分：<span id="high-score">0</span>/100</p>
+        </div>
+        <button id="end-game" onclick="endGame()">結束遊戲</button>
+
+        <div id="end-screen">
+            <h2>遊戲結束！</h2>
+            <p>您的最終得分：<span id="final-score">0</span>/100</p>
+            <p>目前最高得分：<span id="high-score-final">0</span>/100</p>
+            <button id="restart-game" onclick="restartGame()">重新開始遊戲</button>
+        </div>
+    </div>
+
+    <script>
+        let allQuestions = [];
+        let currentQuestions = [];
+        let score = 0;
+        let highScore = parseInt(localStorage.getItem('highScore')) || 0;
+        const maxScore = 100;
+
+        document.getElementById('high-score').innerText = highScore;
+
+        // 從CSV載入資料
+        async function loadQuestions() {
+            const response = await fetch('shanghanlun_questions.csv');
+            const data = await response.text();
+            const rows = data.split('\n').slice(1); // 忽略標題行
+            rows.forEach(row => {
+                const [question, option_1, option_2, option_3, option_4, answer] = row.split(',');
+                allQuestions.push({
+                    question,
+                    options: [option_1, option_2, option_3, option_4],
+                    answer: parseInt(answer)
+                });
+            });
+            startGame();
+        }
+
+        function startGame() {
+            // 隨機選擇 20 題
+            currentQuestions = allQuestions.sort(() => 0.5 - Math.random()).slice(0, 20);
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            document.getElementById('question-container').style.display = 'block';
+            if (currentQuestions.length === 0) {
+                endGame();
+                return;
+            }
+            const questionData = currentQuestions.shift();
+            document.getElementById('question').innerText = questionData.question;
+
+            const optionButtons = document.getElementsByClassName('option-button');
+            for (let i = 0; i < optionButtons.length; i++) {
+                optionButtons[i].innerText = questionData.options[i];
+                optionButtons[i].dataset.correct = (i === questionData.answer).toString();
+            }
+        }
+
+        function selectAnswer(selectedIndex) {
+            const selectedOption = document.getElementsByClassName('option-button')[selectedIndex];
+            const isCorrect = selectedOption.dataset.correct === "true";
+
+            if (isCorrect) {
+                const pointsPerQuestion = Math.floor(maxScore / 20);
+                score += pointsPerQuestion;
+                if (score > 100) score = 100;
+                alert("答對了！");
+            } else {
+                alert("答錯了，再接再厲！");
+            }
+
+            document.getElementById('score').innerText = score;
+            loadQuestion();
+        }
+
+        function endGame() {
+            document.getElementById('question-container').style.display = 'none';
+            document.getElementById('end-game').style.display = 'none';
+            document.getElementById('end-screen').style.display = 'block';
+
+            document.getElementById('final-score').innerText = score;
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('highScore', highScore);
+                alert("新最高得分！恭喜！");
+            }
+            document.getElementById('high-score-final').innerText = highScore;
+            document.getElementById('high-score').innerText = highScore;
+        }
+
+        function restartGame() {
+            score = 0;
+            document.getElementById('score').innerText = score;
+            currentQuestions = [];
+            startGame();
+        }
+
+        loadQuestions(); // 執行載入CSV的功能
+    </script>
+</body>
+</html>
