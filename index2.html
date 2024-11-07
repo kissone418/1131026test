@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>博客來書籍查詢 WEB1.0</title>
+    <style>
+        /* CSS 內容 */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            position: relative;
+        }
+
+        .container {
+            text-align: center;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            max-width: 400px;
+            background-color: #f9f9f9;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #clear-btn {
+            background-color: #f44336;
+        }
+
+        #clear-btn:hover {
+            background-color: #e53935;
+        }
+
+        #result {
+            display: none;
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        #result p {
+            font-size: 1rem;
+        }
+
+        /* 右下角 CSV 下載連結 */
+        #csv-link {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: none;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>博客來書籍查詢系統WEB1.0</h1>
+        
+        <a href="https://www.books.com.tw/web/books/?loc=subject_main_001" target="_blank">請由此查詢博客來書籍</a>
+        <input type="text" id="book-url" placeholder="https://www.books.com.tw/products/XXXXXXX">
+        <button onclick="fetchBookData()">查詢</button>
+        <button id="clear-btn" onclick="clearData()">清除資料</button>
+
+        <div id="result">
+            <h2>查詢結果</h2>
+            <p id="title">書名：<span></span></p>
+            <p id="author">作者：<span></span></p>
+            <p id="publisher">出版社：<span></span></p>
+            <p id="isbn">ISBN：<span></span></p>
+            <p id="price">定價：<span></span></p>
+        </div>
+    </div>
+
+    <!-- 右下角的 CSV 下載連結 -->
+    <a id="csv-link" href="/download_csv" target="_blank">查看查詢的 CSV 資料</a>
+
+    <script>
+        // JavaScript 內容
+        function fetchBookData() {
+            const urlInput = document.getElementById("book-url");
+            const url = urlInput.value;
+
+            if (!url.includes("books.com.tw/products")) {
+                alert("請輸入正確的博客來書籍網址！");
+                return;
+            }
+
+            fetch(`/fetch_book_data?url=${encodeURIComponent(url)}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("title").querySelector("span").textContent = data.title || "無資料";
+                    document.getElementById("author").querySelector("span").textContent = data.author || "無資料";
+                    document.getElementById("publisher").querySelector("span").textContent = data.publisher || "無資料";
+                    document.getElementById("isbn").querySelector("span").textContent = data.isbn || "無資料";
+                    document.getElementById("price").querySelector("span").textContent = data.price || "無資料";
+                    document.getElementById("result").style.display = "block";
+                    urlInput.value = ""; // 清空輸入欄位
+                    document.getElementById("csv-link").style.display = "block"; // 顯示 CSV 下載連結
+                })
+                .catch(error => console.error("Error fetching data:", error));
+        }
+
+        function clearData() {
+            document.getElementById("title").querySelector("span").textContent = "";
+            document.getElementById("author").querySelector("span").textContent = "";
+            document.getElementById("publisher").querySelector("span").textContent = "";
+            document.getElementById("isbn").querySelector("span").textContent = "";
+            document.getElementById("price").querySelector("span").textContent = "";
+            document.getElementById("result").style.display = "none"; // 隱藏查詢結果
+            document.getElementById("book-url").value = ""; // 清空輸入欄位
+            document.getElementById("csv-link").style.display = "none"; // 隱藏 CSV 下載連結
+        }
+    </script>
+</body>
+</html>
