@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>26秒五十音</title>
+  <style>
+    :root {
+      --bg: #fff7ed;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --main: #f97316;
+      --main-dark: #ea580c;
+      --soft: #ffedd5;
+      --good: #16a34a;
+      --bad: #dc2626;
+      --shadow: 0 16px 40px rgba(249, 115, 22, 0.18);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+      background: radial-gradient(circle at top, #fed7aa 0%, var(--bg) 42%, #ffffff 100%);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 18px;
+      overflow-x: hidden;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 430px;
+      min-height: 720px;
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 32px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      position: relative;
+    }
+
+    header {
+      padding: 24px 22px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand h1 { margin: 0; font-size: 26px; letter-spacing: 0.04em; }
+    .brand p { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+
+    .badge {
+      background: var(--soft);
+      color: var(--main-dark);
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    main { padding: 12px 22px 24px; }
+    .screen { display: none; animation: fade 0.25s ease; }
+    .screen.active { display: block; }
+
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero {
+      background: linear-gradient(160deg, #ffffff, #ffedd5);
+      border-radius: 28px;
+      padding: 28px 22px;
+      min-height: 420px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+      border: 1px solid #fed7aa;
+    }
+
+    .hero .big { font-size: 74px; line-height: 1; margin-bottom: 18px; }
+    .hero h2 { font-size: 28px; margin: 0 0 12px; }
+    .hero p { color: var(--muted); line-height: 1.8; margin: 0; }
+    .btns { margin-top: 24px; display: grid; gap: 12px; }
+
+    button {
+      border: 0;
+      border-radius: 18px;
+      padding: 15px 18px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: 0.2s;
+      font-family: inherit;
+    }
+
+    button:active { transform: scale(0.98); }
+    .primary { background: var(--main); color: white; }
+    .primary:hover { background: var(--main-dark); }
+    .secondary { background: var(--soft); color: var(--main-dark); }
+    .ghost { background: #f3f4f6; color: #374151; }
+    .danger { background: #fee2e2; color: var(--bad); }
+    .success { background: #dcfce7; color: var(--good); }
+
+    .progress-wrap {
+      margin: 8px 0 16px;
+      background: #f3f4f6;
+      height: 12px;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #fb923c, #f97316);
+      transition: width 0.3s ease;
+    }
+
+    .hint-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .hint-pill {
+      flex: 1;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.75);
+      border-radius: 999px;
+      padding: 8px;
+    }
+
+    .swipe-area { position: relative; min-height: 520px; touch-action: pan-y; }
+
+    .card {
+      background: var(--card);
+      border-radius: 30px;
+      padding: 24px;
+      min-height: 500px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.06);
+      text-align: center;
+      border: 1px solid #f3f4f6;
+      user-select: none;
+      position: relative;
+      transition: transform 0.22s ease, opacity 0.22s ease;
+    }
+
+    .swipe-label {
+      position: absolute;
+      top: 22px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 900;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.12s ease;
+      z-index: 2;
+    }
+
+    .swipe-left-label { left: 22px; color: var(--bad); background: #fee2e2; }
+    .swipe-right-label { right: 22px; color: var(--good); background: #dcfce7; }
+
+    .timer {
+      width: 88px;
+      height: 88px;
+      margin: 0 auto 18px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: conic-gradient(var(--main) 100%, #f3f4f6 0%);
+    }
+
+    .timer-inner {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: white;
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--main-dark);
+    }
+
+    .kana { font-size: 118px; line-height: 1; font-weight: 900; margin: 8px 0; }
+    .romaji { color: var(--main-dark); font-size: 22px; font-weight: 900; margin-bottom: 12px; }
+
+    .memory-box {
+      background: #fff7ed;
+      border: 1px dashed #fb923c;
+      border-radius: 22px;
+      padding: 16px;
+      margin: 18px 0;
+      text-align: left;
+      line-height: 1.7;
+      min-height: 86px;
+    }
+
+    .word {
+      background: #f9fafb;
+      border-radius: 20px;
+      padding: 14px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 18px; }
+    .stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 12px; }
+
+    .stat {
+      background: #f9fafb;
+      border-radius: 16px;
+      padding: 10px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .stat strong { display: block; font-size: 18px; color: var(--text); margin-top: 2px; }
+    .quiz-title { font-size: 22px; margin: 6px 0 6px; }
+    .quiz-prompt { color: var(--muted); line-height: 1.7; margin-bottom: 18px; }
+    .options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .option {
+      font-size: 44px;
+      background: #f9fafb;
+      border: 2px solid #f3f4f6;
+      padding: 18px;
+      min-height: 96px;
+    }
+
+    .option.correct { border-color: var(--good); background: #dcfce7; }
+    .option.wrong { border-color: var(--bad); background: #fee2e2; }
+    .result-score { font-size: 56px; font-weight: 900; color: var(--main-dark); margin: 16px 0; }
+
+    .mistakes {
+      background: #f9fafb;
+      border-radius: 20px;
+      padding: 14px;
+      text-align: left;
+      min-height: 80px;
+      line-height: 1.8;
+      color: var(--muted);
+      max-height: 180px;
+      overflow: auto;
+    }
+
+    .small-note { font-size: 13px; color: var(--muted); text-align: center; margin-top: 16px; line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <h1>26秒五十音</h1>
+        <p id="modeText">右滑記住，左滑加強</p>
+      </div>
+      <div class="badge" id="modeBadge">五十音</div>
+    </header>
+
+    <main>
+      <section id="home" class="screen active">
+        <div class="hero">
+          <div class="big">あア</div>
+          <h2>像滑短影音一樣學日文</h2>
+          <p>平假名、片假名都能滑卡練習。記住就往右滑，記不住就往左滑；不熟的字會排回後面再次出現。</p>
+          <div class="btns">
+            <button class="primary" onclick="startLesson('hiragana')">平假名滑卡學習</button>
+            <button class="primary" onclick="startLesson('katakana')">片假名滑卡學習</button>
+            <button class="secondary" onclick="startQuiz('hiragana')">測所有平假名</button>
+          </div>
+        </div>
+        <p class="small-note">手機可左右滑；電腦可用下方按鈕。發音使用瀏覽器內建日文語音。</p>
+      </section>
+
+      <section id="lesson" class="screen">
+        <div class="progress-wrap"><div id="lessonProgress" class="progress-bar"></div></div>
+        <div class="hint-row">
+          <div class="hint-pill">← 記不住，再出現</div>
+          <div class="hint-pill">記住，往右滑 →</div>
+        </div>
+
+        <div class="swipe-area" id="swipeArea">
+          <div class="card" id="lessonCard">
+            <div class="swipe-label swipe-left-label" id="leftLabel">再練一次</div>
+            <div class="swipe-label swipe-right-label" id="rightLabel">已記住</div>
+            <div class="timer" id="timerCircle"><div class="timer-inner"><span id="timerText">26</span></div></div>
+            <div class="kana" id="kanaText">あ</div>
+            <div class="romaji" id="romajiText">a</div>
+            <div class="memory-box" id="memoryText">あ 像阿姨張嘴說「啊」。</div>
+            <div class="word" id="wordText">類型：平假名</div>
+            <div class="card-actions">
+              <button class="danger" onclick="markForgot()">← 記不住</button>
+              <button class="success" onclick="markRemembered()">記住 →</button>
+            </div>
+            <div class="card-actions">
+              <button class="secondary" onclick="speakCurrent()">播放發音</button>
+              <button class="ghost" onclick="startQuiz(currentMode)">進入測驗</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats">
+          <div class="stat">已記住<strong id="rememberedCount">0</strong></div>
+          <div class="stat">待加強<strong id="forgotCount">0</strong></div>
+          <div class="stat">剩餘卡片<strong id="queueCount">0</strong></div>
+        </div>
+      </section>
+
+      <section id="quiz" class="screen">
+        <div class="progress-wrap"><div id="quizProgress" class="progress-bar"></div></div>
+        <div class="card">
+          <h2 class="quiz-title" id="quizTitle">快速小測驗</h2>
+          <p class="quiz-prompt" id="quizPrompt">哪一個是假名「a」？</p>
+          <div class="options" id="options"></div>
+          <div class="btns">
+            <button class="secondary" onclick="speakQuizAnswer()">聽發音</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="result" class="screen">
+        <div class="hero">
+          <h2>學習完成</h2>
+          <div class="result-score" id="scoreText">0 / 46</div>
+          <div class="mistakes" id="mistakeText">錯題：無</div>
+          <div class="btns">
+            <button class="primary" onclick="startLesson(currentMode)">再學一次目前字庫</button>
+            <button class="secondary" onclick="startQuiz(currentMode)">再測一次目前字庫</button>
+            <button class="ghost" onclick="showScreen('home')">回首頁</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const baseRows = [
+      ['あ','ア','a','阿姨張嘴說「啊」'], ['い','イ','i','兩根線像衣服的衣'], ['う','ウ','u','烏龜縮頭，念「烏」'], ['え','エ','e','歪頭說「欸？」'], ['お','オ','o','張嘴說「喔」'],
+      ['か','カ','ka','卡片的卡，看到か想卡住'], ['き','キ','ki','鑰匙 key，發 ki'], ['く','ク','ku','嘴巴彎起來說「哭」'], ['け','ケ','ke','像打勾的 k，念 ke'], ['こ','コ','ko','兩條橫線像口，念 ko'],
+      ['さ','サ','sa','像灑水的水流，念 sa'], ['し','シ','shi','像吸管彎彎，念 shi'], ['す','ス','su','像一個人在旋轉，念 su'], ['せ','セ','se','像設定的 set 開頭，念 se'], ['そ','ソ','so','像手勢說 so'],
+      ['た','タ','ta','像打開的太鼓，念 ta'], ['ち','チ','chi','像小孩舉手，念 chi'], ['つ','ツ','tsu','像海浪衝出來，念 tsu'], ['て','テ','te','像手掌伸出，念 te'], ['と','ト','to','像門把凸出，念 to'],
+      ['な','ナ','na','像打結的繩子，念 na'], ['に','ニ','ni','兩條線就是二，念 ni'], ['ぬ','ヌ','nu','像打結的毛線，念 nu'], ['ね','ネ','ne','像貓咪扭身，念 ne'], ['の','ノ','no','像禁止符號的一圈，念 no'],
+      ['は','ハ','ha','哈哈笑的 ha'], ['ひ','ヒ','hi','像人微笑張口 hi'], ['ふ','フ','fu','像風輕輕吹，念 fu'], ['へ','ヘ','he','像山坡，嘿咻往上爬'], ['ほ','ホ','ho','像火柴架，念 ho'],
+      ['ま','マ','ma','像媽媽抱孩子，念 ma'], ['み','ミ','mi','三條線像米粒，念 mi'], ['む','ム','mu','像牛的臉，念 mu'], ['め','メ','me','像眼睛交叉，念 me'], ['も','モ','mo','像毛毛蟲，念 mo'],
+      ['や','ヤ','ya','像箭射出去 ya'], ['ゆ','ユ','yu','像魚鉤，念 yu'], ['よ','ヨ','yo','像溜溜球 yo-yo'],
+      ['ら','ラ','ra','像拉開布幕，念 ra'], ['り','リ','ri','兩筆站直，念 ri'], ['る','ル','ru','像路彎彎，念 ru'], ['れ','レ','re','像列車軌道，念 re'], ['ろ','ロ','ro','像方形路口，念 ro'],
+      ['わ','ワ','wa','像娃娃張手，念 wa'], ['を','ヲ','wo','像彎路繞過去，念 wo'], ['ん','ン','n','像嗯一聲點頭，念 n']
+    ];
+
+    const hiraganaData = baseRows.map(([kana, kata, romaji, hint]) => ({
+      kana, romaji, type: '平假名', memory: `${kana}：${hint}。`, word: '平假名', meaning: romaji
+    }));
+
+    const katakanaData = baseRows.map(([hira, kana, romaji, hint]) => ({
+      kana, romaji, type: '片假名', memory: `${kana}：片假名 ${kana}，對應平假名「${hira}」，發音 ${romaji}。${hint}。`, word: '片假名', meaning: romaji
+    }));
+
+    let activeData = hiraganaData;
+    let currentMode = 'hiragana';
+    let lessonQueue = [];
+    let currentItem = null;
+    let quizIndex = 0;
+    let score = 0;
+    let mistakes = [];
+    let forgottenMap = new Map();
+    let rememberedSet = new Set();
+    let timer = null;
+    let secondsLeft = 26;
+    let dragStartX = 0;
+    let dragCurrentX = 0;
+    let isDragging = false;
+
+    function getDataByMode(mode) {
+      return mode === 'katakana' ? katakanaData : hiraganaData;
+    }
+
+    function getModeName(mode) {
+      return mode === 'katakana' ? '片假名' : '平假名';
+    }
+
+    function setMode(mode) {
+      currentMode = mode || 'hiragana';
+      activeData = getDataByMode(currentMode);
+      document.getElementById('modeBadge').textContent = getModeName(currentMode);
+      document.getElementById('modeText').textContent = `${getModeName(currentMode)}｜右滑記住，左滑加強`;
+    }
+
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      if (id !== 'lesson') clearInterval(timer);
+    }
+
+    function shuffle(array) {
+      return [...array].sort(() => Math.random() - 0.5);
+    }
+
+    function startLesson(mode = currentMode) {
+      setMode(mode);
+      lessonQueue = shuffle(activeData).map(item => ({ ...item, reviewCount: 0 }));
+      forgottenMap = new Map();
+      rememberedSet = new Set();
+      currentItem = null;
+      showScreen('lesson');
+      setupSwipeEvents();
+      renderNextLessonCard();
+    }
+
+    function renderNextLessonCard() {
+      resetCardPosition();
+
+      if (lessonQueue.length === 0) {
+        startQuiz(currentMode);
+        return;
+      }
+
+      currentItem = lessonQueue.shift();
+      document.getElementById('kanaText').textContent = currentItem.kana;
+      document.getElementById('romajiText').textContent = currentItem.romaji;
+      document.getElementById('memoryText').textContent = currentItem.memory;
+      document.getElementById('wordText').textContent = `類型：${currentItem.type}｜發音：${currentItem.romaji}`;
+      updateLessonStats();
+      startTimer();
+      setTimeout(() => speak(currentItem.kana), 400);
+    }
+
+    function updateLessonStats() {
+      const total = activeData.length;
+      const remembered = rememberedSet.size;
+      const progress = Math.min(100, (remembered / total) * 100);
+      document.getElementById('lessonProgress').style.width = `${progress}%`;
+      document.getElementById('rememberedCount').textContent = remembered;
+      document.getElementById('forgotCount').textContent = forgottenMap.size;
+      document.getElementById('queueCount').textContent = lessonQueue.length + (currentItem ? 1 : 0);
+    }
+
+    function startTimer() {
+      clearInterval(timer);
+      secondsLeft = 26;
+      updateTimer();
+      timer = setInterval(() => {
+        secondsLeft--;
+        updateTimer();
+        if (secondsLeft <= 0) markForgot();
+      }, 1000);
+    }
+
+    function updateTimer() {
+      document.getElementById('timerText').textContent = secondsLeft;
+      const percent = Math.max(0, secondsLeft / 26) * 100;
+      document.getElementById('timerCircle').style.background = `conic-gradient(var(--main) ${percent}%, #f3f4f6 0%)`;
+    }
+
+    function markRemembered() {
+      if (!currentItem) return;
+      clearInterval(timer);
+      rememberedSet.add(currentItem.kana);
+      animateCard(520, 12, () => renderNextLessonCard());
+    }
+
+    function markForgot() {
+      if (!currentItem) return;
+      clearInterval(timer);
+      const reviewedItem = { ...currentItem, reviewCount: (currentItem.reviewCount || 0) + 1 };
+      forgottenMap.set(reviewedItem.kana, reviewedItem);
+      const insertAt = Math.min(2, lessonQueue.length);
+      lessonQueue.splice(insertAt, 0, reviewedItem);
+      animateCard(-520, -12, () => renderNextLessonCard());
+    }
+
+    function animateCard(x, rotate, callback) {
+      const card = document.getElementById('lessonCard');
+      card.style.transition = 'transform 0.22s ease, opacity 0.22s ease';
+      card.style.transform = `translateX(${x}px) rotate(${rotate}deg)`;
+      card.style.opacity = '0';
+      setTimeout(callback, 230);
+    }
+
+    function resetCardPosition() {
+      const card = document.getElementById('lessonCard');
+      const leftLabel = document.getElementById('leftLabel');
+      const rightLabel = document.getElementById('rightLabel');
+      card.style.transition = 'none';
+      card.style.transform = 'translateX(0) rotate(0deg)';
+      card.style.opacity = '1';
+      leftLabel.style.opacity = '0';
+      rightLabel.style.opacity = '0';
+    }
+
+    function setupSwipeEvents() {
+      const card = document.getElementById('lessonCard');
+      card.onpointerdown = (e) => {
+        if (e.target.tagName === 'BUTTON') return;
+        isDragging = true;
+        dragStartX = e.clientX;
+        dragCurrentX = 0;
+        card.setPointerCapture(e.pointerId);
+        card.style.transition = 'none';
+      };
+      card.onpointermove = (e) => {
+        if (!isDragging) return;
+        dragCurrentX = e.clientX - dragStartX;
+        const rotate = dragCurrentX / 18;
+        card.style.transform = `translateX(${dragCurrentX}px) rotate(${rotate}deg)`;
+        updateSwipeLabels(dragCurrentX);
+      };
+      card.onpointerup = () => finishDrag();
+      card.onpointercancel = () => finishDrag();
+    }
+
+    function updateSwipeLabels(x) {
+      document.getElementById('leftLabel').style.opacity = x < -40 ? Math.min(1, Math.abs(x) / 120) : 0;
+      document.getElementById('rightLabel').style.opacity = x > 40 ? Math.min(1, Math.abs(x) / 120) : 0;
+    }
+
+    function finishDrag() {
+      if (!isDragging) return;
+      isDragging = false;
+      const threshold = 95;
+      if (dragCurrentX > threshold) markRemembered();
+      else if (dragCurrentX < -threshold) markForgot();
+      else resetCardPosition();
+    }
+
+    function speak(text) {
+      if (!('speechSynthesis' in window)) {
+        alert('這個瀏覽器不支援語音播放。');
+        return;
+      }
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'ja-JP';
+      utterance.rate = 0.75;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function speakCurrent() {
+      if (currentItem) speak(currentItem.kana);
+    }
+
+    function startQuiz(mode = currentMode) {
+      clearInterval(timer);
+      setMode(mode);
+      activeData = shuffle(getDataByMode(currentMode));
+      quizIndex = 0;
+      score = 0;
+      mistakes = [];
+      document.getElementById('quizTitle').textContent = `${getModeName(currentMode)}全套測驗`;
+      showScreen('quiz');
+      renderQuiz();
+    }
+
+    function renderQuiz() {
+      const item = activeData[quizIndex];
+      document.getElementById('quizProgress').style.width = `${(quizIndex / activeData.length) * 100}%`;
+      document.getElementById('quizPrompt').textContent = `哪一個是「${item.romaji}」？`;
+
+      const wrongs = activeData.filter(k => k.kana !== item.kana).sort(() => Math.random() - 0.5).slice(0, 3);
+      const options = [item, ...wrongs].sort(() => Math.random() - 0.5);
+      const box = document.getElementById('options');
+      box.innerHTML = '';
+
+      options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'option';
+        btn.textContent = opt.kana;
+        btn.onclick = () => checkAnswer(btn, opt.kana, item.kana);
+        box.appendChild(btn);
+      });
+
+      setTimeout(() => speak(item.kana), 300);
+    }
+
+    function checkAnswer(button, chosen, correct) {
+      const allOptions = document.querySelectorAll('.option');
+      allOptions.forEach(b => b.disabled = true);
+
+      if (chosen === correct) {
+        score++;
+        button.classList.add('correct');
+      } else {
+        button.classList.add('wrong');
+        mistakes.push(activeData[quizIndex]);
+        allOptions.forEach(b => {
+          if (b.textContent === correct) b.classList.add('correct');
+        });
+      }
+
+      setTimeout(() => {
+        quizIndex++;
+        if (quizIndex >= activeData.length) showResult();
+        else renderQuiz();
+      }, 650);
+    }
+
+    function speakQuizAnswer() {
+      if (activeData[quizIndex]) speak(activeData[quizIndex].kana);
+    }
+
+    function showResult() {
+      document.getElementById('quizProgress').style.width = '100%';
+      document.getElementById('scoreText').textContent = `${score} / ${activeData.length}`;
+      const weakItems = [...forgottenMap.values()];
+      const combined = new Map();
+      weakItems.forEach(item => combined.set(item.kana, item));
+      mistakes.forEach(item => combined.set(item.kana, item));
+
+      if (combined.size === 0) {
+        document.getElementById('mistakeText').textContent = `弱點：無。太好了，${getModeName(currentMode)}已經有記憶痕跡了！`;
+      } else {
+        document.getElementById('mistakeText').innerHTML = '需要加強：<br>' + [...combined.values()].map(m => `${m.kana}（${m.romaji}）：${m.memory}`).join('<br>');
+      }
+      showScreen('result');
+    }
+  </script>
+</body>
+</html>
